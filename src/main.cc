@@ -7,13 +7,33 @@
 
 int main(void)
 {
+	
+	jaguar::sampler::Sampler::Config configHome;
+	configHome.name = "Home";
+	configHome.server = "localhost";
+	configHome.response = fopen("home.html","w");
+	//configHome.display = true;
+	jaguar::sampler::Http httpHome(configHome);
+	if(httpHome.run())
+	{
+		std::cout << "Test " << configHome.name << "(Pass)\n";
+	}
+	else		
+	{
+		std::cout << "Test " << configHome.name << "(Failure)\n";
+	}
+	
+	std::cout << "\n\n";
+
+	
 	jaguar::sampler::Sampler::Config config;
+	config.name = "Login";
 	config.server = "localhost";
 	config.path = "/login.cgi";
 	config.type = jaguar::sampler::Sampler::Type::post;
+	config.response = fopen("login.html","w");
+	//config.display = true;
 	config.params.resize(2);
-	//config.response = fopen("response-1.html","w");
-	config.display = true;
 	config.params[0].name = "user";
 	config.params[0].value = "root";
 	config.params[1].name = "psw";
@@ -22,11 +42,29 @@ int main(void)
 
 	if(http.run())
 	{
-		std::cout << "Prueba pasada..\n";
+		std::cout << "Test " << config.name << "(Pass)\n";
 	}
 	else		
 	{
-		std::cout << "Prueba no pasada..\n";
+		std::cout << "Test " << config.name << "(Failure)\n";
+	}
+
+
+	std::cout << "\n\n";
+
+	jaguar::sampler::Sampler::Config configLogout;
+	configLogout.name = "Logout";
+	configLogout.server = "localhost";
+	configLogout.path = "/logout.cgi";
+	configLogout.response = fopen("logout.html","w");
+	jaguar::sampler::Http httpLogout(configLogout);
+	if(httpLogout.run())
+	{
+		std::cout << "Test " << configLogout.name << "(Pass)\n";
+	}
+	else		
+	{
+		std::cout << "Test " << configLogout.name << "(Failure)\n";
 	}
   
   	return EXIT_SUCCESS;

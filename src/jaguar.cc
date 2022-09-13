@@ -43,6 +43,9 @@ namespace sampler
 	}
 	bool Http::run() const
 	{
+#ifdef ENABLE_DEVEL
+				std::cout << "Test : ---" << config->name << "---\n";
+#endif
 		CURL *curl;
   		CURLcode res;
  
@@ -62,7 +65,11 @@ namespace sampler
 #ifdef ENABLE_DEVEL
 			std::cout << "url : " << url << "\n";
 #endif
+			
     		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			//curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+			//curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
+			 
 			if(config->response)
 			{				
 				curl_easy_setopt(curl, CURLOPT_WRITEDATA, config->response);
@@ -73,16 +80,16 @@ namespace sampler
 				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
 			}
     		/* Now specify the POST data */
-			if(config->type != Sampler::Type::none and config->params.size() > 0)
+			std::string params;
+			if(config->type == Sampler::Type::post and config->params.size() > 0)
 			{
-				std::string params;
 				for(unsigned int i = 0; i < config->params.size() - 1; i++)
 				{
 					params += config->params[i].name + "=" + config->params[i].value + "&";
 				}
 				params += config->params.back().name + "=" + config->params.back().value;
 #ifdef ENABLE_DEVEL
-				std::cout << "params : " << params << "\n";
+				std::cout << "params : '" << params << "'\n";
 #endif
     			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, params.c_str());
 			}  
@@ -95,8 +102,22 @@ namespace sampler
 			if(res != CURLE_OK) return false;
 #ifdef ENABLE_DEVEL
 			char *redirect = NULL;
-    		curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &redirect);
-    		if(redirect) printf("Redirect to: %s\n", redirect);
+			long response_code;
+
+			res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+      		if((res == CURLE_OK) && ((response_code / 100) != 3)) 
+			{
+				/* a redirect implies a 3xx response code */
+				fprintf(stderr, "Not a redirect.\n");
+      		}
+      		else 
+			{
+		    	res = curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirect);	 
+		    	if((res == CURLE_OK) && redirect) 
+				{
+		      		printf("Redirected to: %s\n", redirect);
+		    	}
+			}
 #endif
 			
     		/* always cleanup */
@@ -104,6 +125,9 @@ namespace sampler
   		}
   		curl_global_cleanup();
 
+#ifdef ENABLE_DEVEL
+				std::cout << "----------------\n";
+#endif
 		return true;
 	}
 }
