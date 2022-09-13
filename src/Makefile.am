@@ -1,6 +1,4 @@
-## Process this file with automake to produce Makefile.in
 
-## Created by Anjuta
 
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
@@ -12,16 +10,19 @@ AM_CFLAGS =\
 	 -Wall\
 	 -g
 
-bin_PROGRAMS = pluton
 
-pluton_SOURCES = \
-	main.cc
+lib_LTLIBRARIES = libjaguar.la
 
-pluton_LDFLAGS = 
+libjaguar_la_CXXFLAGS = $(JAGUAR_CFLGAS)
+libjaguar_la_LIBADD = $(JAGUAR_LIBS)
+libjaguar_la_SOURCES = jaguar.cc
 
-pluton_LDADD = $(PLUTON_LIBS)
+bin_PROGRAMS = jaguar
 
+jaguar_SOURCES = main.cc
+jaguar_LDFLAGS = 
+jaguar_LDADD = $(JAGUAR_LIBS) libjaguar.la
 
 if NATIVE_WIN32
-pluton_LDFLAGS += -mwindows
+jaguar_LDFLAGS += -mwindows
 endif

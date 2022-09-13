@@ -1,27 +1,59 @@
-/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*-  */
-/*
- * main.cc
- * Copyright (C) 2022 Azael Reyes <azael.devel@gmail.com>
- * 
- * pluton is free software: you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * pluton is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License along
- * with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 #include <iostream>
+#include <curl/curl.h>
 
-int main()
+#include "jaguar.hh"
+
+
+int main(void)
 {
-	std::cout << "Hello world!" << std::endl;
-	return 0;
+	jaguar::sampler::Sampler::Config config;
+	config.server = "localhost";
+	config.path = "/login.cgi";
+	config.type = jaguar::sampler::Sampler::Type::post;
+	config.params.resize(2);
+	//config.response = fopen("response-1.html","w");
+	config.display = true;
+	config.params[0].name = "user";
+	config.params[0].value = "root";
+	config.params[1].name = "psw";
+	config.params[1].value = "123456";
+	jaguar::sampler::Http http(config);
+
+	if(http.run())
+	{
+		std::cout << "Prueba pasada..\n";
+	}
+	else		
+	{
+		std::cout << "Prueba no pasada..\n";
+	}
+  
+  	return EXIT_SUCCESS;
 }
 
+/*
+#include <stdio.h>
+#include <curl/curl.h>
+ 
+int main(void)
+{
+  CURL *curl;
+  CURLcode res;
+ 
+  curl_global_init(CURL_GLOBAL_ALL);
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "localhost/login.cgi");
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "user=root&psw=123456");
+ 
+    res = curl_easy_perform(curl);
+    if(res != CURLE_OK)
+      fprintf(stderr, "curl_easy_perform() failed: %s\n",
+              curl_easy_strerror(res));
+ 
+    curl_easy_cleanup(curl);
+  }
+  curl_global_cleanup();
+  return 0;
+}*/
