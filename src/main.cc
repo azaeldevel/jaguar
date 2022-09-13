@@ -1,4 +1,6 @@
 
+
+
 #include <iostream>
 #include <curl/curl.h>
 
@@ -8,7 +10,7 @@
 int main(void)
 {
 	
-	jaguar::sampler::Sampler::Config configHome;
+	jaguar::sampler::Http::Config configHome;
 	configHome.name = "Home";
 	configHome.server = "localhost";
 	configHome.response = fopen("home.html","w");
@@ -26,11 +28,11 @@ int main(void)
 	std::cout << "\n\n";
 
 	
-	jaguar::sampler::Sampler::Config config;
+	jaguar::sampler::Http::Config config;
 	config.name = "Login";
 	config.server = "localhost";
 	config.path = "/login.cgi";
-	config.type = jaguar::sampler::Sampler::Type::post;
+	config.type = jaguar::sampler::Http::Type::post;
 	config.response = fopen("login.html","w");
 	//config.display = true;
 	config.params.resize(2);
@@ -52,7 +54,7 @@ int main(void)
 
 	std::cout << "\n\n";
 
-	jaguar::sampler::Sampler::Config configLogout;
+	jaguar::sampler::Http::Config configLogout;
 	configLogout.name = "Logout";
 	configLogout.server = "localhost";
 	configLogout.path = "/logout.cgi";
@@ -69,29 +71,54 @@ int main(void)
   
   	return EXIT_SUCCESS;
 }
+//user=root&psw=123456
+
+
+
+
+
 
 /*
 #include <stdio.h>
 #include <curl/curl.h>
- 
-int main(void)
+
+int main(int argc, char** argv)
 {
-  CURL *curl;
-  CURLcode res;
+
+	CURL *curl;
+  	CURLcode res;
+  	char *location;
+  	long response_code;
  
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl = curl_easy_init();
-  if(curl) {
+  	curl = curl_easy_init();
+  	if(curl) 
+	{
     curl_easy_setopt(curl, CURLOPT_URL, "localhost/login.cgi");
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "user=root&psw=123456");
- 
+ 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "user=root&psw=123456");
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     res = curl_easy_perform(curl);
     if(res != CURLE_OK)
-      fprintf(stderr, "curl_easy_perform() failed: %s\n",
-              curl_easy_strerror(res));
+      	fprintf(stderr, "curl_easy_perform() failed: %s\n",
+  		curl_easy_strerror(res));
+    else {
+      res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+		printf("\nHttp : %i\n", response_code);
+      if((res == CURLE_OK) &&
+         ((response_code / 100) != 3)) {
+        fprintf(stderr, "\nNot a redirect.\n");
+      }
+      else 
+		{
+        res = curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &location);
  
+        if((res == CURLE_OK) && location) {
+          printf("Redirected to: %s\n", location);
+        }
+      }
+    }
     curl_easy_cleanup(curl);
   }
-  curl_global_cleanup();
   return 0;
-}*/
+	
+}
+*/

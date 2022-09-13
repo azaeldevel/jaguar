@@ -19,7 +19,7 @@ namespace jaguar
 namespace sampler
 {
 
-	Sampler::Config::Config() : type(Sampler::Type::none),response(NULL),display(false)
+	Sampler::Config::Config() : response(NULL),display(false)
 	{
 
 	}
@@ -32,7 +32,11 @@ namespace sampler
 
 
 	
-	Http::Http(const Sampler::Config& c) : Sampler(c)
+	Http::Config::Config() : type(Http::Type::none)
+	{
+
+	}
+	Http::Http(const Http::Config& c) : Sampler(c)
 	{
 
 	}
@@ -59,15 +63,15 @@ namespace sampler
     		/* First set the URL that is about to receive our POST. This URL can
        		just as well be a https:// URL if that is what should receive the
        		data. */
-			if(config->server.empty()) return false;
-			std::string url = config->server;
-			if(not config->path.empty()) url += config->path;	
+			if(static_cast<const Http::Config*>(config)->server.empty()) return false;
+			std::string url = static_cast<const Http::Config*>(config)->server;
+			if(not static_cast<const Http::Config*>(config)->path.empty()) url += static_cast<const Http::Config*>(config)->path;	
 #ifdef ENABLE_DEVEL
 			std::cout << "url : " << url << "\n";
 #endif
 			
     		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-			//curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 			//curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
 			 
 			if(config->response)
@@ -81,13 +85,13 @@ namespace sampler
 			}
     		/* Now specify the POST data */
 			std::string params;
-			if(config->type == Sampler::Type::post and config->params.size() > 0)
+			if(static_cast<const Http::Config*>(config)->type == Http::Type::post and static_cast<const Http::Config*>(config)->params.size() > 0)
 			{
-				for(unsigned int i = 0; i < config->params.size() - 1; i++)
+				for(unsigned int i = 0; i < static_cast<const Http::Config*>(config)->params.size() - 1; i++)
 				{
-					params += config->params[i].name + "=" + config->params[i].value + "&";
+					params += static_cast<const Http::Config*>(config)->params[i].name + "=" + static_cast<const Http::Config*>(config)->params[i].value + "&";
 				}
-				params += config->params.back().name + "=" + config->params.back().value;
+				params += static_cast<const Http::Config*>(config)->params.back().name + "=" + static_cast<const Http::Config*>(config)->params.back().value;
 #ifdef ENABLE_DEVEL
 				std::cout << "params : '" << params << "'\n";
 #endif

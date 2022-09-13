@@ -7,26 +7,6 @@
 namespace jaguar
 {
 
-	class Test
-	{
-	public:
-		struct Config
-		{
-			std::string name;
-			std::string brief;
-
-			unsigned short threads;
-			float prob;		
-			
-		};
-
-		Test(const Config&);
-		
-
-	private:
-		const Config* config;
-	};
-
 
 namespace sampler
 {
@@ -38,22 +18,11 @@ namespace sampler
 			std::string name;
 			std::string value;
 		};
-		enum Type
-		{
-			none,
-			get,
-			post
-		};
 		struct Config
 		{
 			std::string name;
 			std::string brief;
 
-			std::string server;
-			std::string path;
-				
-			Type type;
-			std::vector<Parameter> params;
 			FILE* response;
 			bool display;
 
@@ -73,7 +42,27 @@ namespace sampler
 	class Http : public Sampler
 	{
 	public:
-		Http(const Sampler::Config&);	
+		
+		enum Type
+		{
+			none,
+			get,
+			post
+		};
+		struct Config : public Sampler::Config
+		{
+			std::string comment;
+
+			std::string server;
+			std::string path;
+				
+			Type type;
+			std::vector<Parameter> params;
+
+			Config();
+		};
+
+		Http(const Config&);	
 		
 		virtual bool run()const;
 
