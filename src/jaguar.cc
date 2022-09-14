@@ -52,6 +52,7 @@ namespace sampler
 #endif
 		CURL *curl;
   		CURLcode res;
+		long response_code;		
  
   		/* In windows, this will init the winsock stuff */
   		curl_global_init(CURL_GLOBAL_ALL);
@@ -71,7 +72,7 @@ namespace sampler
 #endif
 			
     		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
 			//curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
 			 
 			if(config->response)
@@ -102,16 +103,16 @@ namespace sampler
     		res = curl_easy_perform(curl);
     		/* Check for errors */
     		//if(res != CURLE_OK) fprintf(stderr, "curl_easy_perform() failed: %s\n",curl_easy_strerror(res));
-			//std::cout << "HTTP : " << res << "\n";
+			
 			if(res != CURLE_OK) return false;
-#ifdef ENABLE_DEVEL
-			char *redirect = NULL;
-			long response_code;
-
+			 
+			char *redirect = NULL;	
 			res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+			
+#ifdef ENABLE_DEVEL
+			std::cout << "HTTP : " << response_code << "\n";
       		if((res == CURLE_OK) && ((response_code / 100) != 3)) 
 			{
-				/* a redirect implies a 3xx response code */
 				fprintf(stderr, "Not a redirect.\n");
       		}
       		else 
@@ -128,11 +129,11 @@ namespace sampler
     		curl_easy_cleanup(curl);
   		}
   		curl_global_cleanup();
-
+		
 #ifdef ENABLE_DEVEL
-				std::cout << "----------------\n";
+		std::cout << "----------------\n";
 #endif
-		return true;
+		return (response_code < 400) ? true : false;
 	}
 }
 

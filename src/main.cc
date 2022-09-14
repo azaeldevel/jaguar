@@ -3,12 +3,18 @@
 
 #include <iostream>
 #include <curl/curl.h>
+#include <random>
+
 
 #include "jaguar.hh"
 
 
 int main(void)
 {
+	
+	std::random_device generator;
+  	std::uniform_int_distribution<int> randInt(1,INT_MAX);
+
 	
 	jaguar::sampler::Http::Config configHome;
 	configHome.name = "Home";
@@ -53,7 +59,31 @@ int main(void)
 
 
 	std::cout << "\n\n";
+	int randNumber = randInt(generator);
 
+	jaguar::sampler::Http::Config configAddPermiss;
+	configAddPermiss.name = "Add Permission";
+	configAddPermiss.server = "localhost";
+	configAddPermiss.path = "/user-mang/permissions/add.cgi";
+	configAddPermiss.response = fopen("add-permiss.html","w");
+	configAddPermiss.type = jaguar::sampler::Http::Type::post;
+	configAddPermiss.params.resize(2);
+	configAddPermiss.params[0].name = "name";
+	configAddPermiss.params[0].value = "permis-" + std::to_string(randNumber);
+	configAddPermiss.params[1].name = "brief";
+	configAddPermiss.params[1].value = "Prueba de Jaguar " + std::to_string(randNumber);
+	jaguar::sampler::Http httpAddPermiss(configAddPermiss);
+	if(httpAddPermiss.run())
+	{
+		std::cout << "Test " << configAddPermiss.name << "(Pass)\n";
+	}
+	else		
+	{
+		std::cout << "Test " << configAddPermiss.name << "(Failure)\n";
+	}
+	
+	std::cout << "\n\n";
+	
 	jaguar::sampler::Http::Config configLogout;
 	configLogout.name = "Logout";
 	configLogout.server = "localhost";
@@ -68,7 +98,8 @@ int main(void)
 	{
 		std::cout << "Test " << configLogout.name << "(Failure)\n";
 	}
-  
+
+	
   	return EXIT_SUCCESS;
 }
 //user=root&psw=123456
